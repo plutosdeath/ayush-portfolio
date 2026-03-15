@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ayush Solanki</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy: #0A1628;
+  --navy-2: #111E30;
+  --navy-3: #172640;
+  --gold: #C8963E;
+  --gold-2: #D4A85A;
+  --gold-3: #B8832A;
+  --cream: #F2EBE0;
+  --cream-2: rgba(242,235,224,0.7);
+  --cream-3: rgba(242,235,224,0.35);
+  --cream-4: rgba(242,235,224,0.12);
+  --border: rgba(200,150,62,0.18);
+  --border-2: rgba(200,150,62,0.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--navy);
+  color: var(--cream);
+  font-family: 'Cormorant', Georgia, serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Custom cursor */
+.cursor {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease;
+  mix-blend-mode: screen;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 0.5px solid rgba(200,150,62,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: all 0.08s ease;
+}
+
+/* Canvas */
+#canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* Nav */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 1.8rem 5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  opacity: 0;
+  animation: fadeIn 1s ease 0.5s forwards;
+}
+
+.nav-links {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+  opacity: 0;
+  animation: fadeIn 1s ease 0.7s forwards;
+}
+
+.nav-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--cream-3);
+  text-decoration: none;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: color 0.4s ease;
+}
+
+.nav-links a:hover { color: var(--gold); }
+
+/* Hero */
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 5rem;
+  overflow: hidden;
+}
+
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeUp 1s ease 0.8s forwards;
+}
+
+.hero-name {
+  font-size: clamp(5rem, 12vw, 10rem);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--cream);
+  margin-bottom: 0.3em;
+  opacity: 0;
+  animation: fadeUp 1.2s ease 1s forwards;
+  position: relative;
+}
+
+.hero-name .line-2 {
+  font-style: italic;
+  color: var(--cream);
+  
+  display: block;
+  padding-left: 1.5em;
+}
+
+.hero-statement {
+  max-width: 520px;
+  margin-top: 3rem;
+  margin-left: 0.1em;
+  opacity: 0;
+  animation: fadeUp 1s ease 1.3s forwards;
+}
+
+.hero-statement p {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: var(--cream-2);
+  line-height: 1.8;
+  font-style: italic;
+}
+
+.hero-statement p strong {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--cream);
+}
+
+.hero-cta {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin-top: 3.5rem;
+  opacity: 0;
+  animation: fadeUp 1s ease 1.5s forwards;
+}
+
+.btn-gold {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--navy);
+  background: var(--gold);
+  border: none;
+  padding: 1rem 2.2rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gold::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold-2);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.btn-gold:hover::after { transform: translateX(0); }
+.btn-gold span { position: relative; z-index: 1; }
+
+.btn-line {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cream-3);
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.btn-line::after {
+  content: '';
+  display: block;
+  width: 30px;
+  height: 0.5px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+.btn-line:hover { color: var(--gold); }
+.btn-line:hover::after { width: 50px; }
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute;
+  bottom: 3rem;
+  left: 5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  opacity: 0;
+  animation: fadeIn 1s ease 2s forwards;
+}
+
+.scroll-line {
+  width: 40px;
+  height: 0.5px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.scroll-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gold);
+  animation: scrollAnim 2s ease infinite;
+}
+
+@keyframes scrollAnim {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+
+
+/* Sections base */
+.section {
+  position: relative;
+  z-index: 1;
+  padding: 10rem 5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.section-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  opacity: 0.5;
+  letter-spacing: 0.1em;
+}
+
+.section-rule {
+  width: 40px;
+  height: 0.5px;
+  background: var(--border);
+}
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--cream-3);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.section-title em {
+  font-style: italic;
+  color: var(--gold-2);
+}
+
+/* About */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8rem;
+  margin-top: 5rem;
+  align-items: start;
+}
+
+.about-text p {
+  font-size: 1.15rem;
+  color: var(--cream-2);
+  line-height: 1.9;
+  margin-bottom: 1.5rem;
+}
+
+.about-text p strong {
+  color: var(--cream);
+  font-weight: 400;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-top: 3rem;
+}
+
+.stat-box {
+  background: var(--navy-2);
+  padding: 1.8rem;
+  border: 0.5px solid var(--border-2);
+  transition: border-color 0.3s ease;
+}
+
+.stat-box:hover { border-color: var(--border); }
+
+.stat-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.about-right {
+  position: relative;
+}
+
+.about-quote {
+  font-size: 1.5rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--cream-2);
+  line-height: 1.7;
+  border-left: 1px solid var(--gold);
+  padding-left: 2rem;
+  margin-bottom: 3rem;
+}
+
+.about-quote strong {
+  color: var(--gold-2);
+  font-style: normal;
+}
+
+.skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.skill-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 0.5px solid var(--border-2);
+}
+
+.skill-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  flex: 0 0 100px;
+}
+
+.skill-val {
+  font-size: 0.95rem;
+  color: var(--cream-3);
+}
+
+/* Research */
+.research-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8rem;
+  align-items: end;
+  margin-bottom: 5rem;
+}
+
+.research-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border-2);
+}
+
+.r-card {
+  background: var(--navy-2);
+  padding: 3rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s ease;
+}
+
+.r-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s ease;
+}
+
+.r-card:hover { background: var(--navy-3); }
+.r-card:hover::before { transform: scaleX(1); }
+
+
+
+.r-card:hover 
+
+.r-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+.r-title {
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--cream);
+  line-height: 1.45;
+  margin-bottom: 1rem;
+}
+
+.r-body {
+  font-size: 0.95rem;
+  color: var(--cream-3);
+  line-height: 1.75;
+}
+
+.r-stat {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: var(--gold);
+  margin-top: 2rem;
+  line-height: 1;
+}
+
+.r-stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 0.4rem;
+}
+
+/* Projects */
+.project-rows {
+  margin-top: 4rem;
+  border-top: 0.5px solid var(--border-2);
+}
+
+.p-row {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 3rem;
+  align-items: start;
+  padding: 3rem 0;
+  border-bottom: 0.5px solid var(--border-2);
+  transition: all 0.3s ease;
+}
+
+.p-row:hover .p-title { color: var(--gold-2); }
+
+.p-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  opacity: 0.4;
+  padding-top: 0.4rem;
+}
+
+.p-title {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 0.6rem;
+  transition: color 0.3s ease;
+  line-height: 1.3;
+}
+
+.p-desc {
+  font-size: 1rem;
+  color: var(--cream-3);
+  line-height: 1.75;
+  margin-bottom: 1.2rem;
+}
+
+.p-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.p-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 0.5px solid var(--border);
+  padding: 0.3rem 0.6rem;
+}
+
+.p-year {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--cream-3);
+  padding-top: 0.4rem;
+  white-space: nowrap;
+}
+
+/* Writing */
+.thoughts {
+  margin-top: 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.thought {
+  background: var(--navy-2);
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+.thought:hover { background: var(--navy-3); }
+
+.thought-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+}
+
+.thought-text {
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--cream-2);
+  line-height: 1.8;
+  max-width: 700px;
+}
+
+.thought-topic {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.15em;
+  margin-top: 1.2rem;
+}
+
+
+
+/* Contact */
+.contact-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8rem;
+  align-items: start;
+  margin-top: 5rem;
+}
+
+.contact-title {
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.contact-title em {
+  font-style: italic;
+  color: var(--gold-2);
+}
+
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 1rem;
+}
+
+.c-link {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem 0;
+  border-bottom: 0.5px solid var(--border-2);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  group: true;
+}
+
+.c-link:hover .c-link-val { color: var(--cream); }
+.c-link:hover .c-link-arrow { transform: translateX(4px); }
+
+.c-link-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  flex: 0 0 70px;
+}
+
+.c-link-val {
+  font-size: 1rem;
+  color: var(--cream-3);
+  transition: color 0.3s ease;
+  flex: 1;
+}
+
+.c-link-arrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--cream-3);
+  transition: transform 0.3s ease;
+}
+
+.contact-note {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--cream-3);
+  line-height: 1.8;
+  margin-top: 2rem;
+}
+
+/* Footer */
+footer {
+  position: relative;
+  z-index: 1;
+  padding: 2rem 5rem;
+  border-top: 0.5px solid var(--border-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.1em;
+}
+
+.footer-status {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.1em;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse 2.5s ease infinite;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.8); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+@media (max-width: 900px) {
+  nav { padding: 1.2rem 2rem; }
+  .nav-links { display: none; }
+  .hero { padding: 0 2rem; }
+  .section { padding: 6rem 2rem; }
+  .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .research-intro { grid-template-columns: 1fr; gap: 2rem; }
+  .research-cards { grid-template-columns: 1fr; }
+  .p-row { grid-template-columns: 40px 1fr; }
+  .p-year { display: none; }
+  .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+  footer { padding: 1.5rem 2rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<canvas id="canvas"></canvas>
+
+<nav>
+  <a href="#" class="nav-name">Ayush Solanki</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#writing">Writing</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="home">
+  <div class="hero-eyebrow">Dublin · Europe · Markets</div>
+  <h1 class="hero-name">
+    Ayush
+    <span class="line-2">Solanki</span>
+  </h1>
+  <div class="hero-statement">
+    <p>I think carefully about <strong>markets, people,</strong> and why things are the way they are.<br>I am trying to build something real.</p>
+  </div>
+  <div class="hero-cta">
+    <a href="#research" class="btn-gold"><span>View Research</span></a>
+    <a href="#contact" class="btn-line">Get in touch</a>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll to explore
+  </div>
+</section>
+
+<!-- About -->
+<div class="section" id="about">
+  <div class="section-meta reveal">
+    <span class="section-num">01</span>
+    <div class="section-rule"></div>
+    <span class="section-label">About</span>
+  </div>
+  <h2 class="section-title reveal">Analyst, builder,<br><em>market thinker</em></h2>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <p>First Class Honours MSc in Business Analytics from Maynooth University. BSc in Computer Science from Ahmedabad University. Based in Dublin, building toward a front-office career in Europe.</p>
+      <p>I have spent the last few years at the intersection of <strong>financial modelling, data engineering, and markets research</strong>, building forecasting models that contributed to a funding round, writing institutional research on EU carbon and digital asset markets, and learning to read macro the way traders read it.</p>
+      <p>Python, SQL, and Excel are my tools. Curiosity is the engine.</p>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-num">1.1</div>
+          <div class="stat-label">MSc GPA</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">130k</div>
+          <div class="stat-label">Funding Supported</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">3+</div>
+          <div class="stat-label">Markets Researched</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">30%</div>
+          <div class="stat-label">Reporting Time Saved</div>
+        </div>
+      </div>
+    </div>
+    <div class="about-right reveal reveal-delay-2">
+      <div class="about-quote">
+        "I am most alive when I am trying to understand something properly. The gas-carbon correlation. The MSR mechanics. What it takes to go from a small room in Dublin to where you actually want to be."
+      </div>
+      <div class="skills-list">
+        <div class="skill-row">
+          <span class="skill-name">Languages</span>
+          <span class="skill-val">Python, SQL, Excel, Power BI</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">Finance</span>
+          <span class="skill-val">Modelling, Valuation, Scenario Analysis</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">Markets</span>
+          <span class="skill-val">Carbon, Energy, Digital Assets</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">Method</span>
+          <span class="skill-val">Time Series, ML, Statistical Inference</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Research -->
+<div class="section" id="research">
+  <div class="research-intro">
+    <div>
+      <div class="section-meta reveal">
+        <span class="section-num">02</span>
+        <div class="section-rule"></div>
+        <span class="section-label">Research</span>
+      </div>
+      <h2 class="section-title reveal">How I think<br>about <em>markets</em></h2>
+    </div>
+    <div class="reveal reveal-delay-1">
+      <p style="font-size: 1.05rem; color: var(--cream-3); line-height: 1.8; font-style: italic;">Independent institutional research. No brief, no deadline. Just a question I needed to answer properly.</p>
+    </div>
+  </div>
+  <div class="research-cards reveal">
+    <div class="r-card">
+      <div class="r-tag">EU Carbon Markets · Feb 2026</div>
+      <div class="r-title">EUA Price Dynamics, Key Drivers and the Outlook for Environmental Commodity Trading</div>
+      <div class="r-body">Institutional analysis of EU ETS Phase 4. Gas-carbon correlation, MSR supply mechanics, shipping sector inclusion, 3-scenario forward pricing.</div>
+      <div class="r-stat">149</div>
+      <div class="r-stat-label">BNEF EUR/t forecast to 2030</div>
+    </div>
+    <div class="r-card">
+      <div class="r-tag">Digital Assets · Nov 2025</div>
+      <div class="r-title">The Institutionalization Phase of Digital Assets, Q4 2025 Structural Report</div>
+      <div class="r-body">Bitcoin ETP inflow analysis, S2F model critique under demand-dominant conditions, MiCA regulatory framework, institutional risk quantification.</div>
+      <div class="r-stat">22.5bn</div>
+      <div class="r-stat-label">USD BTC ETP inflows analysed</div>
+    </div>
+    <div class="r-card">
+      <div class="r-tag">Energy Markets · Mar 2026</div>
+      <div class="r-title">Brent Crude, Cross-Asset Analysis of the Iran Escalation Risk Premium</div>
+      <div class="r-body">Real-time cross-asset analysis tracking Brent from $71 to $94 settlement. Hormuz risk premium persistence. Asymmetric energy transition signal.</div>
+      <div class="r-stat">+32%</div>
+      <div class="r-stat-label">Price move tracked in real time</div>
+    </div>
+  </div>
+</div>
+
+<!-- Projects -->
+<div class="section" id="projects">
+  <div class="section-meta reveal">
+    <span class="section-num">03</span>
+    <div class="section-rule"></div>
+    <span class="section-label">Projects</span>
+  </div>
+  <h2 class="section-title reveal">Things I have <em>built</em></h2>
+  <div class="project-rows reveal">
+    <div class="p-row">
+      <div class="p-num">01</div>
+      <div>
+        <div class="p-title">Stock Price Prediction via LSTM Neural Network</div>
+        <div class="p-desc">Built a Long Short-Term Memory deep learning model in Python to predict next-day stock prices for Apple and Tata Motors. Trained across 75 epochs on Yahoo Finance time series data. Tested prediction accuracy across 30 to 100-day forecast windows, identifying Markov-property behaviour in short-window predictions.</div>
+        <div class="p-tags">
+          <span class="p-tag">Python</span>
+          <span class="p-tag">Keras</span>
+          <span class="p-tag">TensorFlow</span>
+          <span class="p-tag">Time Series</span>
+          <span class="p-tag">GitHub</span>
+        </div>
+      </div>
+      <div class="p-year">2022</div>
+    </div>
+    <div class="p-row">
+      <div class="p-num">02</div>
+      <div>
+        <div class="p-title">LLM Skill Extraction Pipeline, Res4City EU Initiative</div>
+        <div class="p-desc">Deployed LLaMA3 8B via Groq API to extract and normalise skills from 72 CVs. Built 3 Python scripts for XML parsing, prefix normalisation, and similarity scoring. Comparative analysis across 4,129 manually annotated data points using 5 similarity metrics.</div>
+        <div class="p-tags">
+          <span class="p-tag">Python</span>
+          <span class="p-tag">LLaMA3</span>
+          <span class="p-tag">NLP</span>
+          <span class="p-tag">ESCO Ontology</span>
+        </div>
+      </div>
+      <div class="p-year">2024</div>
+    </div>
+    <div class="p-row">
+      <div class="p-num">03</div>
+      <div>
+        <div class="p-title">Financial Forecasting Model, Ruby Textiles</div>
+        <div class="p-desc">12-month revenue and cash flow forecasting model with 3-scenario analysis built under a 3-week commercial deadline. Contributed to a 130k pre-seed funding round. Automated Python and SQL pipelines cutting reporting turnaround by 30%.</div>
+        <div class="p-tags">
+          <span class="p-tag">Python</span>
+          <span class="p-tag">SQL</span>
+          <span class="p-tag">Excel</span>
+          <span class="p-tag">Financial Modelling</span>
+        </div>
+      </div>
+      <div class="p-year">2023</div>
+    </div>
+  </div>
+</div>
+
+<!-- Writing -->
+<div class="section" id="writing">
+  <div class="section-meta reveal">
+    <span class="section-num">04</span>
+    <div class="section-rule"></div>
+    <span class="section-label">Writing</span>
+  </div>
+  <h2 class="section-title reveal">What I am<br><em>thinking about</em></h2>
+  <div class="thoughts reveal">
+    <div class="thought">
+      <div class="thought-date">March 2026 · EU Carbon Markets</div>
+      <div class="thought-text">"The most interesting thing about the EU carbon market is that falling emissions can temporarily crash the price of carbon, even as the structural case for higher prices gets stronger. That tension, where short-term signals contradict the long-term direction, is what makes it genuinely worth trading."</div>
+      <div class="thought-topic">From the EU Carbon Market Report</div>
+    </div>
+    <div class="thought">
+      <div class="thought-date">March 2026 · Energy Transition</div>
+      <div class="thought-text">"Higher oil prices are not just a macro signal. They are an accelerant for renewable capex. The energy transition and the oil market are not opposites. They are in a feedback loop that most people are reading in only one direction."</div>
+      <div class="thought-topic">From the Brent Crude Analysis</div>
+    </div>
+    <div class="thought">
+      <div class="thought-date">Ongoing · Personal</div>
+      <div class="thought-text">"I think a lot about why capable people make themselves invisible. About the difference between earning your place and claiming it. I am still figuring out the latter."</div>
+      <div class="thought-topic">On Growth</div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact -->
+<div class="section" id="contact">
+  <div class="section-meta reveal">
+    <span class="section-num">05</span>
+    <div class="section-rule"></div>
+    <span class="section-label">Contact</span>
+  </div>
+  <div class="contact-inner">
+    <div class="reveal">
+      <h2 class="contact-title">Let's talk about<br><em>markets,</em><br>ideas, or<br><em>what you are building.</em></h2>
+      <p class="contact-note">Open to roles across Europe. Available for freelance analytical work. Always happy to talk markets.</p>
+    </div>
+    <div class="reveal reveal-delay-1">
+      <div class="contact-links">
+        <a href="mailto:ayush.c.solanki@gmail.com" class="c-link">
+          <span class="c-link-label">Email</span>
+          <span class="c-link-val">ayush.c.solanki@gmail.com</span>
+          <span class="c-link-arrow">↗</span>
+        </a>
+        <a href="https://linkedin.com/in/ayushsolanki" class="c-link">
+          <span class="c-link-label">LinkedIn</span>
+          <span class="c-link-val">linkedin.com/in/ayushsolanki</span>
+          <span class="c-link-arrow">↗</span>
+        </a>
+        <a href="https://github.com/plutosdeath" class="c-link">
+          <span class="c-link-label">GitHub</span>
+          <span class="c-link-val">github.com/plutosdeath</span>
+          <span class="c-link-arrow">↗</span>
+        </a>
+      </div>
+      <div style="margin-top: 3rem;">
+        <a href="#" class="btn-gold"><span>Download CV</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-text">2026 · Ayush Solanki</div>
+  <div class="footer-status">
+    <div class="dot"></div>
+    Open to opportunities · Dublin · Europe
+  </div>
+</footer>
+
+<script>
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX;
+  my = e.clientY;
+  cursor.style.left = mx - 4 + 'px';
+  cursor.style.top = my - 4 + 'px';
+});
+
+function animRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx - 18 + 'px';
+  ring.style.top = ry - 18 + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'scale(2)';
+    ring.style.transform = 'scale(1.5)';
+    ring.style.borderColor = 'rgba(200,150,62,0.6)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'scale(1)';
+    ring.style.transform = 'scale(1)';
+    ring.style.borderColor = 'rgba(200,150,62,0.4)';
+  });
+});
+
+// Particle canvas
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+const particles = Array.from({length: 60}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 1.2 + 0.3,
+  dx: (Math.random() - 0.5) * 0.15,
+  dy: (Math.random() - 0.5) * 0.15,
+  o: Math.random() * 0.4 + 0.1
+}));
+
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,150,62,${p.o})`;
+    ctx.fill();
+    p.x += p.dx;
+    p.y += p.dy;
+    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
