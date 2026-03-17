@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Europe's Energy Security — Live Dashboard | Ayush Solanki</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --navy: #0A1628;
+  --navy-2: #111E30;
+  --navy-3: #172640;
+  --gold: #C8963E;
+  --gold-2: #D4A85A;
+  --cream: #F2EBE0;
+  --cream-2: rgba(242,235,224,0.7);
+  --cream-3: rgba(242,235,224,0.35);
+  --cream-4: rgba(242,235,224,0.12);
+  --green: #3B6D11;
+  --green-light: #EAF3DE;
+  --red: #A32D2D;
+  --red-light: #FCEBEB;
+  --amber: #854F0B;
+  --border: rgba(200,150,62,0.18);
+  --border-2: rgba(200,150,62,0.08);
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--navy);
+  color: var(--cream);
+  font-family: 'Cormorant', Georgia, serif;
+  font-weight: 300;
+  line-height: 1.7;
+}
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1.5rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10,22,40,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 0.5px solid var(--border);
+}
+.nav-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.nav-back {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--cream-3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.nav-back:hover { color: var(--gold); }
+.hero {
+  padding: 9rem 4rem 4rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.hero-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+.hero-title em { font-style: italic; color: var(--gold-2); }
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--cream-2);
+  max-width: 620px;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  border: 0.5px solid var(--border);
+  padding: 0.4rem 0.8rem;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.dashboard {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 4rem 6rem;
+}
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border-2);
+  margin-bottom: 1.5rem;
+}
+.metric-card {
+  background: var(--navy-2);
+  padding: 1.5rem;
+  transition: background 0.3s;
+}
+.metric-card:hover { background: var(--navy-3); }
+.metric-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.metric-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--cream);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.metric-value.up { color: #E24B4A; }
+.metric-value.green { color: #639922; }
+.metric-value.amber { color: var(--gold); }
+.metric-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.05em;
+}
+.loading-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.8rem;
+  color: var(--cream-3);
+}
+.section-rule {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  margin-top: 2rem;
+}
+.section-rule-line {
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+.section-rule-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-2); margin-bottom: 1px; }
+.panel {
+  background: var(--navy-2);
+  padding: 2rem;
+}
+.panel-full {
+  background: var(--navy-2);
+  padding: 2rem;
+  margin-bottom: 1px;
+}
+.panel-title {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 0.25rem;
+}
+.panel-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  letter-spacing: 0.1em;
+  margin-bottom: 1.25rem;
+}
+.chart-wrap { position: relative; width: 100%; height: 220px; }
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.bar-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  width: 65px;
+  flex-shrink: 0;
+}
+.bar-track {
+  flex: 1;
+  background: var(--navy-3);
+  border-radius: 2px;
+  height: 24px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  border-radius: 2px;
+}
+.bar-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(242,235,224,0.9);
+}
+.bar-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box {
+  background: var(--navy-3);
+  padding: 1rem;
+  border-radius: 2px;
+}
+.stat-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-num.red { color: #E24B4A; }
+.stat-num.amber { color: var(--gold); }
+.stat-num.green { color: #639922; }
+.stat-desc {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  line-height: 1.5;
+}
+.insight {
+  background: rgba(59,109,17,0.12);
+  border-left: 1px solid #639922;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+.insight-text {
+  font-size: 0.95rem;
+  color: var(--cream-2);
+  line-height: 1.7;
+  font-style: italic;
+}
+.thesis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-2); }
+.thesis-card {
+  background: var(--navy-2);
+  padding: 1.5rem;
+  transition: background 0.3s;
+}
+.thesis-card:hover { background: var(--navy-3); }
+.thesis-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+}
+.thesis-title {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+.thesis-body {
+  font-size: 0.9rem;
+  color: var(--cream-3);
+  line-height: 1.7;
+}
+.sources {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--cream-3);
+  line-height: 1.8;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 0.5px solid var(--border-2);
+  letter-spacing: 0.05em;
+}
+.author-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 0.5px solid var(--border);
+}
+.author-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+}
+.author-link {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--cream-3);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  transition: color 0.3s;
+}
+.author-link:hover { color: var(--gold); }
+@media (max-width: 768px) {
+  nav { padding: 1.2rem 1.5rem; }
+  .hero { padding: 7rem 1.5rem 2rem; }
+  .dashboard { padding: 0 1.5rem 4rem; }
+  .metrics-row { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .thesis-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-name">Ayush Solanki</a>
+  <a href="/" class="nav-back">← Back to portfolio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-label">Live Market Analysis · March 2026</div>
+  <h1 class="hero-title">Europe's <em>energy security</em><br>and the biomethane case</h1>
+  <p class="hero-sub">From the Iran escalation driving Brent above $100 to the structural argument for European biomethane. Why the supply shock accelerates the transition rather than delaying it.</p>
+  <div class="live-badge"><div class="live-dot"></div>Brent crude price updating live</div>
+</div>
+
+<div class="dashboard">
+
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-label">Brent crude</div>
+      <div class="metric-value up" id="brent-price"><span class="loading-val">...</span></div>
+      <div class="metric-sub" id="brent-change">Fetching live price</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">EU gas import dependency</div>
+      <div class="metric-value up">90%</div>
+      <div class="metric-sub">of total consumption, 2024</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Biomethane feedstock used</div>
+      <div class="metric-value amber">20%</div>
+      <div class="metric-sub">of available EU potential</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Private investment committed</div>
+      <div class="metric-value green">€28.4bn</div>
+      <div class="metric-sub">to EU biomethane, 2025</div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <div class="section-rule-label">01 · The supply shock</div>
+    <div class="section-rule-line"></div>
+  </div>
+
+  <div class="panel-full">
+    <div class="panel-title">Brent crude: Iran escalation timeline</div>
+    <div class="panel-sub">USD per barrel · key events</div>
+    <div class="bar-row">
+      <div class="bar-label">Feb 27</div>
+      <div class="bar-track"><div class="bar-fill" style="width:59%;background:#5F5E5A;"><span class="bar-text">Baseline</span></div></div>
+      <div class="bar-num">$71</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Mar 4</div>
+      <div class="bar-track"><div class="bar-fill" style="width:70%;background:#854F0B;"><span class="bar-text">US strikes begin</span></div></div>
+      <div class="bar-num">$84</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Mar 7</div>
+      <div class="bar-track"><div class="bar-fill" style="width:82%;background:#A32D2D;"><span class="bar-text">Hormuz threat</span></div></div>
+      <div class="bar-num">$99</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Mar 9 peak</div>
+      <div class="bar-track"><div class="bar-fill" style="width:97%;background:#791F1F;"><span class="bar-text">Intraday high</span></div></div>
+      <div class="bar-num">$116</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Mar 9 settle</div>
+      <div class="bar-track"><div class="bar-fill" style="width:78%;background:#A32D2D;"><span class="bar-text">Settlement</span></div></div>
+      <div class="bar-num">$94</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Today (live)</div>
+      <div class="bar-track" id="live-bar-track"><div class="bar-fill" id="live-bar" style="width:85%;background:#C8963E;"><span class="bar-text" id="live-bar-text">Loading...</span></div></div>
+      <div class="bar-num" id="live-bar-num">...</div>
+    </div>
+    <div class="insight">
+      <div class="insight-text">The risk premium has not dissipated. Brent remains $30+ above pre-escalation levels. Hormuz handles 20% of global oil flows. Markets are pricing tail risk, not just current disruption. The IEA released 400 million barrels of emergency reserves, slowing but not reversing the move.</div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <div class="section-rule-label">02 · Europe's vulnerability</div>
+    <div class="section-rule-line"></div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">Import dependency by the numbers</div>
+      <div class="panel-sub">The structural exposure the crisis exposed</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-num red">90%</div>
+          <div class="stat-desc">EU gas imported in 2024</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num red">273 bcm</div>
+          <div class="stat-desc">Imported of 332 bcm consumed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num amber">2027</div>
+          <div class="stat-desc">Russian gas full phase-out target</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num green">6%</div>
+          <div class="stat-desc">Current share from biogases</div>
+        </div>
+      </div>
+      <div class="insight">
+        <div class="insight-text">Removing Russian supply by 2027 solves one geopolitical problem. It does not solve the import dependency. Europe needs domestic production at scale.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Biomethane: production vs potential</div>
+      <div class="panel-sub">TWh per year · current and targets</div>
+      <div class="bar-row" style="margin-top:0.5rem;">
+        <div class="bar-label">Today</div>
+        <div class="bar-track"><div class="bar-fill" style="width:17%;background:#3B6D11;"><span class="bar-text">60 TWh</span></div></div>
+        <div class="bar-num">60 TWh</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">2030 target</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#639922;"><span class="bar-text">REPowerEU: 350 TWh</span></div></div>
+        <div class="bar-num">350 TWh</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">2040 potential</div>
+        <div class="bar-track" style="border:0.5px dashed #3B6D11;"><div class="bar-fill" style="width:100%;background:transparent;"><span class="bar-text" style="color:#639922;">80% of EU gas demand</span></div></div>
+        <div class="bar-num">100 bcm</div>
+      </div>
+      <div style="margin-top:1rem;">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--cream-3);margin-bottom:6px;letter-spacing:0.1em;">FEEDSTOCK UTILISATION TODAY</div>
+        <div style="background:var(--navy-3);border-radius:2px;height:18px;overflow:hidden;">
+          <div style="width:20%;height:100%;background:#639922;"></div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--cream-3);margin-top:4px;">Only 20% of available feedstock currently used</div>
+      </div>
+      <div class="insight">
+        <div class="insight-text">€28.4bn in private investment already committed. Investment appetite is strong. What is missing is a clear regulatory framework that stimulates demand.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-rule">
+    <div class="section-rule-label">03 · The trading thesis</div>
+    <div class="section-rule-line"></div>
+  </div>
+
+  <div class="thesis-grid">
+    <div class="thesis-card">
+      <div class="thesis-num">01</div>
+      <div class="thesis-title">Supply shock accelerates the transition</div>
+      <div class="thesis-body">$100+ oil makes European biomethane cost-competitive almost overnight. Energy security concerns give politicians the mandate to deliver the regulatory framework the sector has been waiting for. Crisis becomes catalyst.</div>
+    </div>
+    <div class="thesis-card">
+      <div class="thesis-num">02</div>
+      <div class="thesis-title">Certificate markets deepen and become tradeable</div>
+      <div class="thesis-body">As biomethane scales toward the 350 TWh REPowerEU target, Guarantees of Origin and Proof of Sustainability certificates become liquid instruments. Cross-commodity expertise across EUAs, biofuels, and renewable gas becomes structurally valuable.</div>
+    </div>
+    <div class="thesis-card">
+      <div class="thesis-num">03</div>
+      <div class="thesis-title">Compliance buyers need sophisticated counterparties</div>
+      <div class="thesis-body">Shipping, industry, and power producers facing cost pressure from both oil prices and carbon obligations need flexible hedging solutions. Market makers with cross-commodity reach and deep regulatory knowledge capture the spread.</div>
+    </div>
+  </div>
+
+  <div class="sources">
+    Sources: ICE / Investing.com (Brent live via Alpha Vantage) · European Biogas Association Statistical Report 2024-25 · REPowerEU Plan, European Commission · EBA Biomethane Competitiveness Report Feb 2026 · Rabobank Biomethane Landscape 2025 · IEA Emergency Reserve Release Mar 2026 · STX Group / Financial Times, Mar 2026
+  </div>
+
+  <div class="author-row">
+    <div class="author-name">Ayush Solanki · Independent Market Analysis</div>
+    <a href="/" class="author-link">ayush-portfolio-azure.vercel.app</a>
+  </div>
+
+</div>
+
+<script>
+async function fetchBrent() {
+  try {
+    const res = await fetch('https://www.alphavantage.co/query?function=BRENT&interval=daily&apikey=JLVH0XOTERSLV20B');
+    const data = await res.json();
+    const values = data.data;
+    if (!values || values.length === 0) throw new Error('No data');
+    const latest = values[0];
+    const prev = values[1];
+    const price = parseFloat(latest.value);
+    const prevPrice = parseFloat(prev.value);
+    const change = ((price - prevPrice) / prevPrice * 100).toFixed(2);
+    const changeSign = change >= 0 ? '+' : '';
+    document.getElementById('brent-price').textContent = '$' + price.toFixed(2);
+    document.getElementById('brent-change').textContent = changeSign + change + '% vs prev day · ' + latest.date;
+    const pct = Math.min(98, Math.max(20, ((price - 71) / (116 - 71)) * 97));
+    document.getElementById('live-bar').style.width = pct + '%';
+    document.getElementById('live-bar-text').textContent = 'Live · ' + latest.date;
+    document.getElementById('live-bar-num').textContent = '$' + price.toFixed(2);
+    const priceEl = document.getElementById('brent-price');
+    if (change >= 0) {
+      priceEl.classList.add('up');
+    } else {
+      priceEl.classList.remove('up');
+      priceEl.style.color = '#639922';
+    }
+  } catch(e) {
+    document.getElementById('brent-price').textContent = '$102.92';
+    document.getElementById('brent-change').textContent = 'Last known · Mar 17 2026';
+    document.getElementById('live-bar-text').textContent = 'Mar 17 2026';
+    document.getElementById('live-bar-num').textContent = '$102.92';
+  }
+}
+fetchBrent();
+</script>
+</body>
+</html>
